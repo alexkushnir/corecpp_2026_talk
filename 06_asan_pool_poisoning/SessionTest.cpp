@@ -7,10 +7,11 @@
 
 #include "Session.h"
 
-TEST(Session, ReportsSizeAfterClose) {
+TEST(Session, ReportsSizeAfterClose)
+{
     Pool pool(16);
     Session session(pool);
     session.Receive("hello");
     session.Close();
-    EXPECT_EQ(session.LastSize(), 5u);  // stale read: passes without poisoning
+    EXPECT_EQ(session.LastSize(), 5u); // stale read: passes without poisoning
 }

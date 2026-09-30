@@ -4,9 +4,10 @@
 
 // Fixed-size block pool: one heap chunk, handed out in kBlock-byte pieces.
 // ASan only sees the chunk, so the pool poisons blocks it does not own.
-class Pool {
-  public:
-    static constexpr std::size_t s_BlockSize = 64;  // multiple of 8 (shadow granularity)
+class Pool
+{
+public:
+    static constexpr std::size_t sBlockSize = 64; // multiple of 8 (shadow granularity)
 
     explicit Pool(std::size_t blocks);
     ~Pool();
@@ -16,8 +17,8 @@ class Pool {
     void* Alloc();
     void Release(void* p);
 
-  private:
+private:
     std::byte* m_chunk;
     std::size_t m_size;
-    std::vector<void*> m_free;  // kept outside the blocks, never poisoned
+    std::vector<void*> m_free; // kept outside the blocks, never poisoned
 };
