@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.16)
+project(parsing_valgrind_output CXX)
+ 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.18.0
+  GIT_SHALLOW    TRUE
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+include(GoogleTest)
+ 
+add_executable(parsing_tests Session.cpp SessionPool.cpp Server.cpp ServerTest.cpp)
+target_link_libraries(parsing_tests PRIVATE GTest::gtest_main)
