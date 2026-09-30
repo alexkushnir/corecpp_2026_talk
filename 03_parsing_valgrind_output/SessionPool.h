@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Session.h"
- 
-class SessionPool {
+
+class SessionPool
+{
 public:
-    Session* acquire(int id);
-    void release(Session* s);
+    Session* Acquire(int id);
+    void Release(Session* s);
 };

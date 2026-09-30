@@ -18,22 +18,24 @@
 #include <vector>
 
 #if defined(__SANITIZE_ADDRESS__)
-    #define POOL_USE_HEAP 1
+#define POOL_USE_HEAP 1
 #elif defined(__has_feature)
-    #if __has_feature(address_sanitizer)
-        #define POOL_USE_HEAP 1
-    #endif
+#if __has_feature(address_sanitizer)
+#define POOL_USE_HEAP 1
+#endif
 #endif
 
-struct Message {
-    std::uint32_t id;
-    std::uint32_t checksum;
-    unsigned char payload[56];
+struct Message
+{
+    std::uint32_t m_id;
+    std::uint32_t m_checksum;
+    unsigned char m_payload[56];
 };
 
-std::uint32_t checksum_of(const Message& m) {
+std::uint32_t ChecksumOf(const Message& m)
+{
     std::uint32_t sum = m.id;
-    for (unsigned char b : m.payload) 
+    for (unsigned char b : m.m_payload)
     {
         sum = sum * 31 + b;
     }
@@ -43,17 +45,19 @@ std::uint32_t checksum_of(const Message& m) {
 
 // Fixed-size pool: hands out recycled blocks instead of new/delete.
 // Under ASan it uses real heap allocations so ASan can track lifetimes.
-class MessagePool {
+class MessagePool
+{
 public:
-    explicit MessagePool(std::size_t size) 
-        : m_storage(size) {
-        for (auto& m : m_storage) 
-        { 
+    explicit MessagePool(std::size_t size) : m_storage(size)
+    {
+        for (auto& m : m_storage)
+        {
             m_free.push_back(&m);
         }
     }
 
-    Message* acquire() {
+    Message* Acquire()
+    {
 #ifdef POOL_USE_HEAP
         return new Message{};
 #else
@@ -61,16 +65,17 @@ public:
         if (m_free.empty())
         {
             return nullptr;
-        } 
+        }
 
         Message* m = m_free.back();
         m_free.pop_back();
 
         return m;
 #endif
-}
+    }
 
-    void release(Message* m) {
+    void Release(Message* m)
+    {
 #ifdef POOL_USE_HEAP
         delete m;
 #else
@@ -86,25 +91,28 @@ private:
 };
 
 // Simple blocking queue of message pointers; nullptr means "stop".
-class MessageQueue {
+class MessageQueue
+{
 public:
-    void push(Message* m) {
+    void Push(Message* m)
+    {
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             m_queue.push_back(m);
         }
-    
+
         m_condVar.notify_one();
     }
 
-    Message* pop() {
-            std::unique_lock<std::mutex> lock(m_mutex);
-            m_condVar.wait(lock, [&] { return !m_queue.empty(); });
-            
+    Message* Pop()
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_condVar.wait(lock, [&] { return !m_queue.empty(); });
+
         Message* m = m_queue.front();
         m_queue.pop_front();
-            return m;
-        }
+        return m;
+    }
 
 private:
     std::deque<Message*> m_queue;
@@ -112,53 +120,59 @@ private:
     std::condition_variable m_condVar;
 };
 
-struct Stats {
-    int processed = 0;
-    int corrupted = 0;
+struct Stats
+{
+    int m_processed = 0;
+    int m_corrupted = 0;
 };
 
-Stats run_pipeline(int count) {
+Stats RunPipeline(int count)
+{
     MessagePool pool(4);
     MessageQueue queue;
     Stats stats;
 
-    std::thread worker([&] {
-        while (Message* m = queue.pop()) {
-            std::this_thread::yield();            // simulate some work
-            if (checksum_of(*m) != m->checksum)   // reads the message
+    std::thread worker(
+        [&]
+        {
+            while (Message* m = queue.Pop())
             {
-                ++stats.corrupted;
+                std::this_thread::yield();          // simulate some work
+                if (ChecksumOf(*m) != m->checksum) // reads the message
+                {
+                    ++stats.m_corrupted;
+                }
+                ++stats.m_processed;
             }
-            ++stats.processed;
-        }
-    });
+        });
 
-    for (int i = 0; i < count; ++i) 
+    for (int i = 0; i < count; ++i)
     {
         Message* m = nullptr;
-        while ((m = pool.acquire()) == nullptr)
+        while ((m = pool.Acquire()) == nullptr)
         {
             std::this_thread::yield();
-        } 
+        }
 
         m->id = static_cast<std::uint32_t>(i);
-        for (auto& b : m->payload) 
+        for (auto& b : m->m_payload)
         {
             b = static_cast<unsigned char>(i);
         }
-        
+
         m->checksum = checksum_of(*m);
-        queue.push(m);
-        pool.release(m);  // Bug: the worker still owns this message
+        queue.Push(m);
+        pool.Release(m); // Bug: the worker still owns this message
     }
 
-    queue.push(nullptr);
+    queue.Push(nullptr);
     worker.join();
     return stats;
 }
 
-TEST(Pipeline, ProcessesEveryMessage) {
-    Stats stats = run_pipeline(10000);
+TEST(Pipeline, ProcessesEveryMessage)
+{
+    Stats stats = RunPipeline(10000);
     std::printf("processed=%d corrupted=%d\n", stats.processed, stats.corrupted);
-    EXPECT_EQ(stats.processed, 10000);
+    EXPECT_EQ(stats.m_processed, 10000);
 }

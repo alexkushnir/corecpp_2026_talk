@@ -1,10 +1,11 @@
 #include "SessionPool.h"
- 
-Session* SessionPool::acquire(int id) {
+
+Session* SessionPool::Acquire(int id)
+{
     return new Session(id);
 }
- 
-void SessionPool::release(Session* s) {
+
+void SessionPool::Release(Session* s)
+{
     delete s;
 }
- 

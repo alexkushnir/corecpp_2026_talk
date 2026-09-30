@@ -1,10 +1,11 @@
 #pragma once
 
 #include "SessionPool.h"
- 
-struct Request {
-  Session* session;
+
+struct Request
+{
+    Session* m_session;
 };
- 
-void close_idle(SessionPool& pool, Request& req);
-int handle(Request& req);
+
+void CloseIdle(SessionPool& pool, Request& req);
+int Handle(Request& req);
