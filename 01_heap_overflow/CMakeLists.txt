@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(ENABLE_ASAN "Build with AddressSanitizer" OFF)
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -20,7 +22,7 @@ include(GoogleTest)
 
 add_executable(heap_overflow heap_overflow.cpp)
 
-if (ASAN)
+if (ENABLE_ASAN)
   target_compile_options(heap_overflow PRIVATE -fsanitize=address)
   target_link_options(heap_overflow PRIVATE -fsanitize=address)
 endif()
