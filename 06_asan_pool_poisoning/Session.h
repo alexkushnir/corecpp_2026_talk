@@ -20,7 +20,7 @@ private:
     struct Message
     {
         std::uint32_t m_size;
-        char m_data[Pool::s_BlockSize - sizeof(std::uint32_t)];
+        char m_data[Pool::sBlockSize - sizeof(std::uint32_t)];
     };
 
     Pool& m_pool;
