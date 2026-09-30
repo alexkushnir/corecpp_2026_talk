@@ -137,7 +137,7 @@ Stats RunPipeline(int count)
         {
             while (Message* m = queue.Pop())
             {
-                std::this_thread::yield();          // simulate some work
+                std::this_thread::yield();         // simulate some work
                 if (ChecksumOf(*m) != m->checksum) // reads the message
                 {
                     ++stats.m_corrupted;

@@ -12,7 +12,7 @@ void RingBuffer::Push(int value)
     m_data[m_head] = value; // writes m_data[m_capacity] once per lap
     ++m_pushed;
     if (++m_head > m_capacity) // BUG: should be >=
-    { 
+    {
         m_head = 0;
     }
 }

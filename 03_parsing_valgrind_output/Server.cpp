@@ -1,11 +1,11 @@
 #include "Server.h"
 
-void close_idle(SessionPool& pool, Request& req)
+void CloseIdle(SessionPool& pool, Request& req)
 {
-    pool.release(req.session); // BUG: req.session still points at it
+    pool.Release(req.m_session); // BUG: req.session still points at it
 }
 
-int handle(Request& req)
+int Handle(Request& req)
 {
     return req.session->id(); // reads a freed Session
 }
