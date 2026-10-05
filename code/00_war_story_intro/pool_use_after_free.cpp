@@ -34,7 +34,7 @@ struct Message
 
 std::uint32_t ChecksumOf(const Message& m)
 {
-    std::uint32_t sum = m.id;
+    std::uint32_t sum = m.m_id;
     for (unsigned char b : m.m_payload)
     {
         sum = sum * 31 + b;
@@ -138,7 +138,7 @@ Stats RunPipeline(int count)
             while (Message* m = queue.Pop())
             {
                 std::this_thread::yield();         // simulate some work
-                if (ChecksumOf(*m) != m->checksum) // reads the message
+                if (ChecksumOf(*m) != m->m_checksum) // reads the message
                 {
                     ++stats.m_corrupted;
                 }
@@ -154,13 +154,13 @@ Stats RunPipeline(int count)
             std::this_thread::yield();
         }
 
-        m->id = static_cast<std::uint32_t>(i);
+        m->m_id = static_cast<std::uint32_t>(i);
         for (auto& b : m->m_payload)
         {
             b = static_cast<unsigned char>(i);
         }
 
-        m->checksum = checksum_of(*m);
+        m->m_checksum = ChecksumOf(*m);
         queue.Push(m);
         pool.Release(m); // Bug: the worker still owns this message
     }
@@ -173,6 +173,6 @@ Stats RunPipeline(int count)
 TEST(Pipeline, ProcessesEveryMessage)
 {
     Stats stats = RunPipeline(10000);
-    std::printf("processed=%d corrupted=%d\n", stats.processed, stats.corrupted);
+    std::printf("processed=%d corrupted=%d\n", stats.m_processed, stats.m_corrupted);
     EXPECT_EQ(stats.m_processed, 10000);
 }

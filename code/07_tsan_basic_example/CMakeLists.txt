@@ -8,7 +8,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(ENABLE_TSAN "Build with ThreadSanitizer" OFF)
 
 add_executable(tsan_basic_example Race.cpp)
-target_link_libraries(tsan_basic_example PRIVATE GTest::gtest_main)
 
 if(ENABLE_TSAN)
   target_compile_options(tsan_basic_example PRIVATE -fsanitize=thread -g -O1)

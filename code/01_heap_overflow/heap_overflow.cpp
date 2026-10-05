@@ -15,5 +15,5 @@ std::string MakeLabel(const std::string& name)
 
 TEST(Label, CopiesName)
 {
-    EXPECT_EQ(make_label("sensor"), "sensor");
+    EXPECT_EQ(MakeLabel("sensor"), "sensor");
 }

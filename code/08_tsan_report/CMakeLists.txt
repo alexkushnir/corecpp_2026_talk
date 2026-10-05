@@ -7,7 +7,17 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(ENABLE_TSAN "Build with ThreadSanitizer" OFF)
 
-add_executable(stats_tests stats.cpp worker.cpp stats_test.cpp)
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.18.0
+  GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(googletest)
+find_package(Threads REQUIRED)
+
+add_executable(stats_tests Stats.cpp Worker.cpp StatsTest.cpp)
 target_link_libraries(stats_tests PRIVATE GTest::gtest_main Threads::Threads)
 
 if(ENABLE_TSAN)

@@ -8,7 +8,7 @@
 TEST(Server, HandlesRequestAfterIdleCheck)
 {
     SessionPool pool;
-    Request req{pool.acquire(42)};
-    close_idle(pool, req);
-    EXPECT_EQ(handle(req), 42); // passes: freed block still holds 42
+    Request req{pool.Acquire(42)};
+    CloseIdle(pool, req);
+    EXPECT_EQ(Handle(req), 42); // passes: freed block still holds 42
 }

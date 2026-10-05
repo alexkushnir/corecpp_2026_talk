@@ -3,11 +3,11 @@
 #include <sanitizer/asan_interface.h> // macros are no-ops without ASan
 
 Pool::Pool(std::size_t blocks)
-    : m_chunk(new std::byte[blocks * s_BlockSize]), m_size(blocks * s_BlockSize)
+    : m_chunk(new std::byte[blocks * sBlockSize]), m_size(blocks * sBlockSize)
 {
     for (std::size_t i = 0; i < blocks; ++i)
     {
-        m_free.push_back(m_chunk + i * s_BlockSize);
+        m_free.push_back(m_chunk + i * sBlockSize);
     }
     // Nothing is handed out yet: the whole chunk is off-limits.
     ASAN_POISON_MEMORY_REGION(m_chunk, m_size);
@@ -24,13 +24,13 @@ void* Pool::Alloc()
     void* p = m_free.back();
     m_free.pop_back();
     // handed out: make it accessible
-    ASAN_UNPOISON_MEMORY_REGION(p, s_BlockSize);
+    ASAN_UNPOISON_MEMORY_REGION(p, sBlockSize);
     return p;
 }
 
 void Pool::Release(void* p)
 {
     // returned: any access is now a bug
-    ASAN_POISON_MEMORY_REGION(p, s_BlockSize);
+    ASAN_POISON_MEMORY_REGION(p, sBlockSize);
     m_free.push_back(p);
 }

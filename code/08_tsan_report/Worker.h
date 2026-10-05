@@ -1,7 +1,7 @@
 #pragma once
 #include <thread>
 
-#include "stats.h"
+#include "Stats.h"
 
 // Handles requests on its own thread and records their latency.
 class Worker
