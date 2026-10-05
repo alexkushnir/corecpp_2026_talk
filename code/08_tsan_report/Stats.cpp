@@ -18,6 +18,5 @@ long Stats::Count() const
 
 int Stats::Max() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
     return m_max;
 }
